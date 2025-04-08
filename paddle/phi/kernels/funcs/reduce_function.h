@@ -165,7 +165,7 @@ struct ReduceIndexMapping {
       : dim(dims), loop_size(max_loop) {}
 
 #ifdef PADDLE_WITH_XPU_KP
-  __device__ __forceinline__ int BlockIdX() {
+  __device__ __forceinline__ int64_t BlockIdX() {
     if (ReduceLastDim) {
       return (cluster_id() / dim.split_num_x % dim.split_num_y);
     } else {
@@ -173,7 +173,7 @@ struct ReduceIndexMapping {
     }
   }
 
-  __device__ __forceinline__ int BlockIdY() {
+  __device__ __forceinline__ int64_t BlockIdY() {
     if (ReduceLastDim) {
       return (cluster_id() % dim.split_num_x);
     } else {
@@ -181,11 +181,11 @@ struct ReduceIndexMapping {
     }
   }
 
-  __device__ __forceinline__ int BlockDimX() { return dim.deal_size_x; }
+  __device__ __forceinline__ int64_t BlockDimX() { return dim.deal_size_x; }
 
-  __device__ __forceinline__ int BlockDimY() { return 1; }
+  __device__ __forceinline__ int64_t BlockDimY() { return 1; }
 
-  __device__ __forceinline__ int GridDimX() {
+  __device__ __forceinline__ int64_t GridDimX() {
     if (ReduceLastDim) {
       return dim.split_num_y;
     } else {
@@ -193,7 +193,7 @@ struct ReduceIndexMapping {
     }
   }
 
-  __device__ __forceinline__ int GridDimY() {
+  __device__ __forceinline__ int64_t GridDimY() {
     if (ReduceLastDim) {
       return dim.split_num_x;
     } else {
@@ -203,23 +203,35 @@ struct ReduceIndexMapping {
 
   __device__ __forceinline__ int64_t GetLoopSize() {
     if ((!ReduceLastDim) && (loop_size == 1)) {
-      return static_cast<int64_t>(dim.deal_size_x);
+      return dim.deal_size_x;
     } else {
       return loop_size;
     }
   }
 #else
-  __device__ __forceinline__ int BlockIdX() { return blockIdx.x; }
+  __device__ __forceinline__ int64_t BlockIdX() {
+    return static_cast<int64_t>(blockIdx.x);
+  }
 
-  __device__ __forceinline__ int BlockIdY() { return blockIdx.y; }
+  __device__ __forceinline__ int64_t BlockIdY() {
+    return static_cast<int64_t>(blockIdx.y);
+  }
 
-  __device__ __forceinline__ int BlockDimX() { return blockDim.x; }
+  __device__ __forceinline__ int64_t BlockDimX() {
+    return static_cast<int64_t>(blockDim.x);
+  }
 
-  __device__ __forceinline__ int BlockDimY() { return blockDim.y; }
+  __device__ __forceinline__ int64_t BlockDimY() {
+    return static_cast<int64_t>(blockDim.y);
+  }
 
-  __device__ __forceinline__ int GridDimX() { return gridDim.x; }
+  __device__ __forceinline__ int64_t GridDimX() {
+    return static_cast<int64_t>(gridDim.x);
+  }
 
-  __device__ __forceinline__ int GridDimY() { return gridDim.y; }
+  __device__ __forceinline__ int64_t GridDimY() {
+    return static_cast<int64_t>(gridDim.y);
+  }
 
   __device__ int64_t GetLoopSize() { return 1; }
 #endif
