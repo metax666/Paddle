@@ -161,7 +161,7 @@ __device__ __forceinline__ void ReadData(Ty* dst,
                                          int size_nx,
                                          int size_ny,
                                          int stride_nx,
-                                         int stride_ny) {
+                                         int64_t stride_ny) {
   int thread_offset = threadIdx.x;
   int left_size_nx = size_nx - thread_offset;
 
