@@ -62,9 +62,12 @@ class TestMaxMinAmaxAminAPI(unittest.TestCase):
             grad = np.zeros(self.shape)
             out_b = np.broadcast_to(out.view(), self.shape)
             grad[self.x_np == out_b] = 1
-            grad_sum = grad.sum(self.axis).reshape(out.shape)
-            grad_b = np.broadcast_to(grad_sum, self.shape)
-            grad /= grad_sum
+            if func in ['amax', 'amin'] or (
+                func in ['max', 'min'] and self.axis is None
+            ):
+                grad_sum = grad.sum(self.axis).reshape(out.shape)
+                grad_b = np.broadcast_to(grad_sum, self.shape)
+                grad /= grad_sum
 
             self.np_grad[func] = grad
 
