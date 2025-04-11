@@ -29,7 +29,7 @@ __global__ void Cross(const T* x,
                       T* out,
                       const int64_t stride,
                       const int64_t N,
-                      phi::funcs::IndexCalculator index_calculator) {
+                      phi::funcs::IndexCalculator<int> index_calculator) {
   CUDA_KERNEL_LOOP(i, N) {
     int64_t offset = index_calculator(i);
 
@@ -149,7 +149,7 @@ void CrossKernel(const Context& dev_ctx,
   const auto* input_x_data = input_x.data<T>();
   const auto* input_y_data = input_y.data<T>();
   auto* out_data = dev_ctx.template Alloc<T>(out);
-  auto index_calculator = phi::funcs::IndexCalculator(
+  auto index_calculator = phi::funcs::IndexCalculator<int>(
       merged_dims.size() - 1, cal_dims, left_strides, full_strides);
 
   int64_t numel = x.numel();

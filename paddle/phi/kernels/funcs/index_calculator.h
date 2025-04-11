@@ -50,6 +50,7 @@ static inline Array<T, ElementCount> VectorToArray(const VectorLikeType& vec) {
   return ret;
 }
 }  // namespace details
+template <typename IndexType>
 struct IndexCalculator {
   IndexCalculator(int dim,
                   const std::vector<int64_t>& cal_dims,
@@ -70,9 +71,9 @@ struct IndexCalculator {
 #endif
   }
 
-  __device__ inline int64_t operator()(int64_t offset) const {
+  __device__ inline IndexType operator()(IndexType offset) const {
 #ifdef PADDLE_WITH_XPU_KP
-    int64_t index = 0;
+    IndexType index = 0;
 #pragma unroll
     for (int i = 0; i < kMaxRank; ++i) {
       if (i == dim) {
@@ -83,7 +84,7 @@ struct IndexCalculator {
     }
     return index;
 #else
-    int64_t index = 0;
+    IndexType index = 0;
 #pragma unroll
     for (int i = 0; i < kMaxRank; ++i) {
       if (i == dim) {

@@ -32,7 +32,7 @@ __global__ void CrossGrad(const T* x,
                           T* out_dy,
                           const int64_t stride,
                           const int64_t N,
-                          phi::funcs::IndexCalculator index_calculator) {
+                          phi::funcs::IndexCalculator<int> index_calculator) {
   CUDA_KERNEL_LOOP(i, N) {
     int64_t offset = index_calculator(i);
 
@@ -168,7 +168,7 @@ void CrossGradKernel(const Context& dev_ctx,
   const auto* input_out_grad_data = input_out_grad.data<T>();
   auto* output_x_grad_data = dev_ctx.template Alloc<T>(x_grad);
   auto* output_y_grad_data = dev_ctx.template Alloc<T>(y_grad);
-  auto index_calculator = phi::funcs::IndexCalculator(
+  auto index_calculator = phi::funcs::IndexCalculator<int>(
       merged_dims.size() - 1, cal_dims, left_strides, full_strides);
 
   backends::gpu::GpuLaunchConfig config =

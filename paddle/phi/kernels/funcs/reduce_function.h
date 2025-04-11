@@ -239,12 +239,13 @@ struct ReduceIndexMapping {
 
 // when reduce_type == kReduceLastDim this struct will be used
 // for higher performance
+template <typename IndexType>
 struct OneDimIndexCal {
-  explicit OneDimIndexCal(int64_t num) : stride(num) {}
-  __device__ inline int64_t operator()(int64_t index) const {
+  explicit OneDimIndexCal(IndexType num) : stride(num) {}
+  __device__ inline IndexType operator()(IndexType index) const {
     return index * stride;
   }
-  int64_t stride;
+  IndexType stride;
 };
 
 // reduce config
@@ -584,14 +585,15 @@ template <typename Tx,
           typename MPType,
           typename ReduceOp,
           typename TransformOp,
-          typename Calculator>
+          typename Calculator,
+          typename IndexType>
 __global__ void ReduceAnyKernel(const Tx* x,
                                 Ty* y,
                                 ReduceOp reducer,
                                 TransformOp transformer,
                                 MPType init,
-                                int64_t reduce_num,
-                                int64_t left_num,
+                                IndexType reduce_num,
+                                IndexType left_num,
                                 bool reduce_last_dim,
                                 const Calculator reduce_index_calculator,
                                 const Calculator left_index_calculator,
@@ -599,14 +601,14 @@ __global__ void ReduceAnyKernel(const Tx* x,
                                 bool is_mean,
                                 MPType* tmp_data,
                                 bool need_store_tmp = false) {
-  int64_t input_idx, left_idx, stride;
-  int64_t block_size = 0;
+  IndexType input_idx, left_idx, stride;
+  IndexType block_size = 0;
   bool need_store = true;
-  int64_t loop_left = 0;
-  int64_t tid = 0;
+  IndexType loop_left = 0;
+  IndexType tid = 0;
   // the last dim gets involved in reduction
-  int64_t store_offset = 0;
-  int64_t stride_left = 0;
+  IndexType store_offset = 0;
+  IndexType stride_left = 0;
   if (reduce_last_dim) {
     auto block = ReduceIndexMapping<true>(dim, left_num);
     input_idx = block.BlockIdY() * block.BlockDimX();
@@ -615,7 +617,8 @@ __global__ void ReduceAnyKernel(const Tx* x,
     block_size = block.BlockDimX();
     need_store = (THREAD_ID_X == 0) && (left_idx < left_num);
     store_offset = block.BlockIdY() * left_num + left_idx;
-    loop_left = min(block.GetLoopSize(), left_num - left_idx);
+    loop_left =
+        min(static_cast<IndexType>(block.GetLoopSize()), left_num - left_idx);
     stride_left = 1;
     tid = THREAD_ID_X;
   } else {
@@ -625,7 +628,8 @@ __global__ void ReduceAnyKernel(const Tx* x,
     stride = block.GridDimY() * block.BlockDimY();
     block_size = block.BlockDimY();
     need_store = (THREAD_ID_Y == 0) && (left_idx < left_num);
-    loop_left = min(block.GetLoopSize(), left_num - left_idx);
+    loop_left =
+        min(static_cast<IndexType>(block.GetLoopSize()), left_num - left_idx);
     stride_left = block.BlockDimX() * block.GridDimX();
     store_offset = block.BlockIdY() * left_num + left_idx;
     tid = THREAD_ID_Y;
@@ -634,13 +638,13 @@ __global__ void ReduceAnyKernel(const Tx* x,
   // 1. reduce for each thread
   MPType input_compute[REDUCE_VEC_SIZE];
   Tx input_reg[REDUCE_VEC_SIZE];
-  int64_t input_idx_tmp = input_idx;
-  for (int64_t i = 0; i < loop_left; i += stride_left) {
-    int64_t input_offset = left_index_calculator(left_idx + i);
+  IndexType input_idx_tmp = input_idx;
+  for (IndexType i = 0; i < loop_left; i += stride_left) {
+    IndexType input_offset = left_index_calculator(left_idx + i);
     const _ptr_ Tx* input = x + input_offset;
     MPType reduce_var = init;
     // load REDUCE_VEC_SIZE data once, and then compute
-    int64_t bound = reduce_num - (REDUCE_VEC_SIZE - 1) * stride;
+    IndexType bound = reduce_num - (REDUCE_VEC_SIZE - 1) * stride;
     input_idx = input_idx_tmp;
     for (; input_idx + block_size < bound;
          input_idx += REDUCE_VEC_SIZE * stride) {
@@ -651,16 +655,17 @@ __global__ void ReduceAnyKernel(const Tx* x,
                           1,
                           Calculator,
                           kps::IdentityFunctor<Tx>,
-                          false>(&input_reg[0],
-                                 input,
-                                 input_idx,
-                                 reduce_index_calculator,
-                                 1,
-                                 reduce_num,
-                                 1,
-                                 stride,
-                                 kps::IdentityFunctor<Tx>(),
-                                 reduce_last_dim);
+                          false,
+                          IndexType>(&input_reg[0],
+                                     input,
+                                     input_idx,
+                                     reduce_index_calculator,
+                                     1,
+                                     reduce_num,
+                                     1,
+                                     stride,
+                                     kps::IdentityFunctor<Tx>(),
+                                     reduce_last_dim);
       kps::ElementwiseUnary<Tx, MPType, REDUCE_VEC_SIZE, 1, TransformOp>(
           &input_compute[0], &input_reg[0], transformer);
       kps::Reduce<MPType,
@@ -679,16 +684,17 @@ __global__ void ReduceAnyKernel(const Tx* x,
                         1,
                         Calculator,
                         TransformOp,
-                        true>(&input_compute[0],
-                              input,
-                              input_idx,
-                              reduce_index_calculator,
-                              1,
-                              reduce_num - input_idx,
-                              1,
-                              stride,
-                              transformer,
-                              reduce_last_dim);
+                        true,
+                        IndexType>(&input_compute[0],
+                                   input,
+                                   input_idx,
+                                   reduce_index_calculator,
+                                   1,
+                                   reduce_num - input_idx,
+                                   1,
+                                   stride,
+                                   transformer,
+                                   reduce_last_dim);
     kps::Reduce<MPType,
                 REDUCE_VEC_SIZE,
                 1,
@@ -717,37 +723,38 @@ template <typename Tx,
           typename Ty,
           typename MPType,
           typename ReduceOp,
-          typename TransformOp>
+          typename TransformOp,
+          typename IndexType>
 __global__ void ReduceHigherDimKernel(const Tx* x,
                                       Ty* y,
                                       ReduceOp reducer,
                                       TransformOp transformer,
                                       MPType init,
-                                      int64_t reduce_num,
-                                      int64_t left_num,
-                                      int64_t blocking_size,
+                                      IndexType reduce_num,
+                                      IndexType left_num,
+                                      IndexType blocking_size,
                                       const kps::DimConfig dim,
-                                      int64_t mean_div,
+                                      IndexType mean_div,
                                       bool is_mean,
                                       MPType* tmp_data,
                                       bool need_store_tmp = false) {
   // when reduce_dim.size() == 1 and reduce_dim[0] != x_dim.size() - 1, this
   // function will be used
   auto block = ReduceIndexMapping<false>(dim);
-  int64_t idy = block.BlockIdY() * blocking_size;
-  int64_t idx = block.BlockIdX() * block.BlockDimX();
-  int64_t idz = BLOCK_ID_Z * left_num;
-  int64_t stride = dim.split_num_x * dim.deal_size_x;
-  int64_t size = left_num - dim.rem_x;
-  int64_t loop_size = min(reduce_num - idy, blocking_size);
-  int64_t store_offset = block.BlockIdY() * left_num + idz * block.GridDimY();
-  int64_t block_offset = idy * left_num + idz * reduce_num;
+  IndexType idy = block.BlockIdY() * blocking_size;
+  IndexType idx = block.BlockIdX() * block.BlockDimX();
+  IndexType idz = BLOCK_ID_Z * left_num;
+  IndexType stride = dim.split_num_x * dim.deal_size_x;
+  IndexType size = left_num - dim.rem_x;
+  IndexType loop_size = min(reduce_num - idy, blocking_size);
+  IndexType store_offset = block.BlockIdY() * left_num + idz * block.GridDimY();
+  IndexType block_offset = idy * left_num + idz * reduce_num;
   const _ptr_ Tx* input = x + block_offset;
   Tx reduce_input;
   for (; idx < size; idx += stride) {
     MPType reduce_var = init;
     MPType reduce_compute = init;
-    for (int64_t loop_idx = 0; loop_idx < loop_size; ++loop_idx) {
+    for (IndexType loop_idx = 0; loop_idx < loop_size; ++loop_idx) {
       kps::ReadData<Tx, Tx, 1, 1, false>(&reduce_input,
                                          input + loop_idx * left_num + idx,
                                          block.BlockDimX(),
@@ -775,7 +782,7 @@ __global__ void ReduceHigherDimKernel(const Tx* x,
   if (idx < left_num) {
     MPType reduce_var = init;
     MPType reduce_compute = init;
-    for (int64_t loop_idx = 0; loop_idx < loop_size; ++loop_idx) {
+    for (IndexType loop_idx = 0; loop_idx < loop_size; ++loop_idx) {
       kps::ReadData<Tx, Tx, 1, 1, true>(&reduce_input,
                                         input + loop_idx * left_num + idx,
                                         dim.rem_x,
@@ -806,7 +813,8 @@ template <typename Tx,
           typename Ty,
           typename MPType,
           typename ReduceOp,
-          typename TransformOp>
+          typename TransformOp,
+          typename IndexType>
 static void LaunchReduceKernel(const Tx* x_data,
                                Ty* y_data,
                                const ReduceOp& reducer,
@@ -819,8 +827,8 @@ static void LaunchReduceKernel(const Tx* x_data,
     int64_t stride_reduce = 1;
     int64_t stride_left = config.reduce_num;
     // for higher performance
-    auto reduce_index_calculator = OneDimIndexCal(stride_reduce);
-    auto left_index_calculator = OneDimIndexCal(stride_left);
+    auto reduce_index_calculator = OneDimIndexCal<IndexType>(stride_reduce);
+    auto left_index_calculator = OneDimIndexCal<IndexType>(stride_left);
 
     kps::DimConfig dim = kps::DimConfig(config.grid.x,
                                         config.grid.y,
@@ -837,30 +845,36 @@ static void LaunchReduceKernel(const Tx* x_data,
     auto grid_num = config.grid;
     auto block_num = config.block;
 #endif
-    ReduceAnyKernel<Tx, Ty, MPType, ReduceOp, TransformOp, OneDimIndexCal>
-        <<<grid_num, block_num, 0, stream>>>(
-            x_data,
-            y_data,
-            reducer,
-            transform,
-            init,
-            config.reduce_num,
-            config.left_num,
-            config.reduce_last_dim,
-            reduce_index_calculator,
-            left_index_calculator,
-            dim,
-            is_mean && (!config.should_reduce_again),
-            config.tmp_data,
-            config.should_reduce_again);
+    ReduceAnyKernel<Tx,
+                    Ty,
+                    MPType,
+                    ReduceOp,
+                    TransformOp,
+                    OneDimIndexCal<IndexType>,
+                    IndexType><<<grid_num, block_num, 0, stream>>>(
+        x_data,
+        y_data,
+        reducer,
+        transform,
+        init,
+        static_cast<IndexType>(config.reduce_num),
+        static_cast<IndexType>(config.left_num),
+        config.reduce_last_dim,
+        reduce_index_calculator,
+        left_index_calculator,
+        dim,
+        is_mean && (!config.should_reduce_again),
+        config.tmp_data,
+        config.should_reduce_again);
   } else {
     int reduce_rank = config.reduce_strides.size();
     int left_rank = config.left_strides.size();
-    auto reduce_index_calculator = IndexCalculator(reduce_rank,
-                                                   config.reduce_dim,
-                                                   config.reduce_strides,
-                                                   config.x_strides);
-    auto left_index_calculator = IndexCalculator(
+    auto reduce_index_calculator =
+        IndexCalculator<IndexType>(reduce_rank,
+                                   config.reduce_dim,
+                                   config.reduce_strides,
+                                   config.x_strides);
+    auto left_index_calculator = IndexCalculator<IndexType>(
         left_rank, config.left_dim, config.left_strides, config.x_strides);
 
     kps::DimConfig dim = kps::DimConfig(config.grid.x,
@@ -878,22 +892,27 @@ static void LaunchReduceKernel(const Tx* x_data,
     auto grid_num = config.grid;
     auto block_num = config.block;
 #endif
-    ReduceAnyKernel<Tx, Ty, MPType, ReduceOp, TransformOp, IndexCalculator>
-        <<<grid_num, block_num, 0, stream>>>(
-            x_data,
-            y_data,
-            reducer,
-            transform,
-            init,
-            config.reduce_num,
-            config.left_num,
-            config.reduce_last_dim,
-            reduce_index_calculator,
-            left_index_calculator,
-            dim,
-            is_mean && (!config.should_reduce_again),
-            config.tmp_data,
-            config.should_reduce_again);
+    ReduceAnyKernel<Tx,
+                    Ty,
+                    MPType,
+                    ReduceOp,
+                    TransformOp,
+                    IndexCalculator<IndexType>,
+                    IndexType><<<grid_num, block_num, 0, stream>>>(
+        x_data,
+        y_data,
+        reducer,
+        transform,
+        init,
+        static_cast<IndexType>(config.reduce_num),
+        static_cast<IndexType>(config.left_num),
+        config.reduce_last_dim,
+        reduce_index_calculator,
+        left_index_calculator,
+        dim,
+        is_mean && (!config.should_reduce_again),
+        config.tmp_data,
+        config.should_reduce_again);
   }
 
   if (config.should_reduce_again) {
@@ -911,8 +930,8 @@ static void LaunchReduceKernel(const Tx* x_data,
         kps::DimConfig(grid.x, grid.y, grid.z, block.x, config.grid.y, 0);
     dim.SetRem(config.left_num % block.x, 0, 0);
 #ifdef PADDLE_WITH_XPU_KP
-    int64_t grid_size = 8;
-    int64_t block_size = 64;
+    int grid_size = 8;
+    int block_size = 64;
 #else
     auto grid_size = grid;
     auto block_size = block;
@@ -921,21 +940,21 @@ static void LaunchReduceKernel(const Tx* x_data,
                           Ty,
                           MPType,
                           ReduceOp,
-                          kps::IdentityFunctor<MPType, MPType>>
-        <<<grid_size, block_size, 0, stream>>>(
-            config.tmp_data,
-            y_data,
-            reducer,
-            kps::IdentityFunctor<MPType, MPType>(),
-            init,
-            config.grid.y,
-            config.left_num,
-            config.grid.y,
-            dim,
-            config.reduce_num,
-            is_mean,
-            config.tmp_data,
-            false);
+                          kps::IdentityFunctor<MPType, MPType>,
+                          IndexType><<<grid_size, block_size, 0, stream>>>(
+        config.tmp_data,
+        y_data,
+        reducer,
+        kps::IdentityFunctor<MPType, MPType>(),
+        init,
+        static_cast<IndexType>(config.grid.y),
+        static_cast<IndexType>(config.left_num),
+        static_cast<IndexType>(config.grid.y),
+        dim,
+        static_cast<IndexType>(config.reduce_num),
+        is_mean,
+        config.tmp_data,
+        false);
   }
 }
 
@@ -1087,6 +1106,7 @@ void ReduceKernel(const KPDevice& dev_ctx,
   using MPType = typename phi::dtype::MPTypeTrait<Ty>::Type;
   auto config = ReduceConfig<Ty, MPType>(origin_reduce_dims, x_dim);
   config.Run(dev_ctx);
+
   int64_t numel = x.numel();
   // after config.run()
   // SetOutputData for ReduceHigherDim when should_reduce_again is true,
@@ -1147,21 +1167,47 @@ void ReduceKernel(const KPDevice& dev_ctx,
     auto grid_num = config.grid;
     auto block_num = config.block;
 #endif
-    ReduceHigherDimKernel<Tx, Ty, MPType, ReduceOp<MPType>, TransformOp>
-        <<<grid_num, block_num, 0, stream>>>(
-            x_data,
-            y_data,
-            reducer,
-            transform,
-            reducer.initial(),
-            config.reduce_num,
-            config.left_num,
-            config.blocking_size,
-            dim,
-            config.reduce_num,
-            IsMean && (!config.should_reduce_again),
-            config.tmp_data,
-            config.should_reduce_again);
+    if (numel > std::numeric_limits<int32_t>::max()) {
+      ReduceHigherDimKernel<Tx,
+                            Ty,
+                            MPType,
+                            ReduceOp<MPType>,
+                            TransformOp,
+                            int64_t><<<grid_num, block_num, 0, stream>>>(
+          x_data,
+          y_data,
+          reducer,
+          transform,
+          reducer.initial(),
+          static_cast<int64_t>(config.reduce_num),
+          static_cast<int64_t>(config.left_num),
+          static_cast<int64_t>(config.blocking_size),
+          dim,
+          static_cast<int64_t>(config.reduce_num),
+          IsMean && (!config.should_reduce_again),
+          config.tmp_data,
+          config.should_reduce_again);
+    } else {
+      ReduceHigherDimKernel<Tx,
+                            Ty,
+                            MPType,
+                            ReduceOp<MPType>,
+                            TransformOp,
+                            int32_t><<<grid_num, block_num, 0, stream>>>(
+          x_data,
+          y_data,
+          reducer,
+          transform,
+          reducer.initial(),
+          static_cast<int32_t>(config.reduce_num),
+          static_cast<int32_t>(config.left_num),
+          static_cast<int32_t>(config.blocking_size),
+          dim,
+          static_cast<int32_t>(config.reduce_num),
+          IsMean && (!config.should_reduce_again),
+          config.tmp_data,
+          config.should_reduce_again);
+    }
 
     if (config.should_reduce_again) {
       dim3 block = dim3(config.block.x, 1, 1);
@@ -1171,31 +1217,53 @@ void ReduceKernel(const KPDevice& dev_ctx,
       dim2.SetRem(config.left_num % config.block.x, 0, 0);
 
 #ifdef PADDLE_WITH_XPU_KP
-      int64_t grid_size = 8;
-      int64_t block_size = 64;
+      int grid_size = 8;
+      int block_size = 64;
 #else
       auto grid_size = grid;
       auto block_size = block;
 #endif
-      ReduceHigherDimKernel<MPType,
-                            Ty,
-                            MPType,
-                            ReduceOp<MPType>,
-                            kps::IdentityFunctor<MPType, MPType>>
-          <<<grid_size, block_size, 0, stream>>>(
-              config.tmp_data,
-              y_data,
-              reducer,
-              kps::IdentityFunctor<MPType, MPType>(config.grid.y),
-              reducer.initial(),
-              config.grid.y,
-              config.left_num,
-              config.grid.y,
-              dim2,
-              config.reduce_num,
-              IsMean,
-              config.tmp_data,
-              false);
+      if (numel > std::numeric_limits<int32_t>::max()) {
+        ReduceHigherDimKernel<MPType,
+                              Ty,
+                              MPType,
+                              ReduceOp<MPType>,
+                              kps::IdentityFunctor<MPType, MPType>,
+                              int64_t><<<grid_size, block_size, 0, stream>>>(
+            config.tmp_data,
+            y_data,
+            reducer,
+            kps::IdentityFunctor<MPType, MPType>(config.grid.y),
+            reducer.initial(),
+            static_cast<int64_t>(config.grid.y),
+            static_cast<int64_t>(config.left_num),
+            static_cast<int64_t>(config.grid.y),
+            dim2,
+            static_cast<int64_t>(config.reduce_num),
+            IsMean,
+            config.tmp_data,
+            false);
+      } else {
+        ReduceHigherDimKernel<MPType,
+                              Ty,
+                              MPType,
+                              ReduceOp<MPType>,
+                              kps::IdentityFunctor<MPType, MPType>,
+                              int32_t><<<grid_size, block_size, 0, stream>>>(
+            config.tmp_data,
+            y_data,
+            reducer,
+            kps::IdentityFunctor<MPType, MPType>(config.grid.y),
+            reducer.initial(),
+            static_cast<int32_t>(config.grid.y),
+            static_cast<int32_t>(config.left_num),
+            static_cast<int32_t>(config.grid.y),
+            dim2,
+            static_cast<int32_t>(config.reduce_num),
+            IsMean,
+            config.tmp_data,
+            false);
+      }
     }
     return;
   }
@@ -1203,15 +1271,27 @@ void ReduceKernel(const KPDevice& dev_ctx,
   // when reduce_dim.size() == 1 and reduce_dim[0] == x_dim.size() - 1, or
   // when reduce_dim.size() != 1 and reduce_dim.size() != x_dim.size(), this
   // function will be used
-  LaunchReduceKernel<Tx, Ty, MPType, ReduceOp<MPType>, TransformOp>(
-      x_data,
-      y_data,
-      reducer,
-      transform,
-      reducer.initial(),
-      stream,
-      config,
-      IsMean);
+  if (numel > std::numeric_limits<int32_t>::max()) {
+    LaunchReduceKernel<Tx, Ty, MPType, ReduceOp<MPType>, TransformOp, int64_t>(
+        x_data,
+        y_data,
+        reducer,
+        transform,
+        reducer.initial(),
+        stream,
+        config,
+        IsMean);
+  } else {
+    LaunchReduceKernel<Tx, Ty, MPType, ReduceOp<MPType>, TransformOp, int32_t>(
+        x_data,
+        y_data,
+        reducer,
+        transform,
+        reducer.initial(),
+        stream,
+        config,
+        IsMean);
+  }
 }
 
 template <typename Tx,
@@ -1254,7 +1334,7 @@ void ReduceFunctor(const Context& context,
   // construct the squeezed output tensor
   DDim out_dims = output->dims();
   if (keep_dim && x_rank > 1) {
-    const int64_t kDelFlag = -2;
+    const int kDelFlag = -2;
     auto dims_vector = common::vectorize(out_dims);
     for (size_t i = 0; i < dims_ref.size(); ++i) {
       dims_vector[dims_ref[i]] = kDelFlag;
