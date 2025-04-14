@@ -1018,3 +1018,17 @@ if((WITH_FLUX) AND (LINUX))
   set_tests_properties(test_fused_attention_pass_with_mp PROPERTIES TIMEOUT
                                                                     "120")
 endif()
+if((WITH_GPU) AND LOCAL_ALL_PLAT)
+  bash_test_modules(
+    test_dualpipe
+    START_BASH
+    ../../legacy_test/dist_test.sh
+    TIMEOUT
+    "500"
+    LABELS
+    "RUN_TYPE=DIST"
+    ENVS
+    "PADDLE_DIST_UT_PORT=21282;http_proxy=;https_proxy=;PYTHONPATH=../..:${PADDLE_BINARY_DIR}/python"
+  )
+  set_tests_properties(test_dualpipe PROPERTIES TIMEOUT "500")
+endif()
