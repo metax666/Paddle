@@ -85,7 +85,7 @@ class ArrayRef {
                                               : std::begin(Vec)),
         Length(Vec.size()) {}
 
-  const paddle::IntArray& _PD_ToPaddleIntArray() const {
+  const paddle::IntArray _PD_ToPaddleIntArray() const {
     return paddle::IntArray(Data, Length);
   }
 };
@@ -273,18 +273,28 @@ using Dtype = at::ScalarType;
 
 void compiling_test() {
   // Example usage of the Tensor class
+  std::cout << "111111";
   at::Tensor a = at::ones({2, 3}, at::TensorOptions());
+  std::cout << "222222";
   at::Tensor b = at::full({2, 3}, 1, at::ScalarType::Float);
+  std::cout << "333333";
   double c = 10;
   at::Tensor a_contig = a.contiguous();
+  std::cout << "444444";
   at::Tensor b_contig = b.contiguous();
+  std::cout << "555555";
   at::Tensor result = at::empty(a_contig.sizes(), a_contig.options());
+  std::cout << "666666";
   const float* a_ptr = a_contig.data_ptr<float>();
+  std::cout << "777777";
   const float* b_ptr = b_contig.data_ptr<float>();
+  std::cout << "888888";
   float* result_ptr = result.data_ptr<float>();
+  std::cout << "999999";
   for (int64_t i = 0; i < a_contig.numel(); i++) {
     result_ptr[i] = a_ptr[i] * b_ptr[i] + c;
   }
+  std::cout << "000000";
   // Show result
   for (int64_t i = 0; i < a_contig.numel(); i++) {
     std::cout << "Result[" << i << "] = " << a_ptr[i] * b_ptr[i] + c

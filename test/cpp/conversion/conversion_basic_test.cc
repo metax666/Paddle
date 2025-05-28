@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 
 TEST(conversion_basic_test, BasicCase) {
-  // Example usage of the Tensor class
   at::Tensor a = at::ones({2, 3}, at::TensorOptions());
   at::Tensor b = at::full({2, 3}, 2, at::ScalarType::Float);
   double c = 10;
