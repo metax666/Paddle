@@ -18,7 +18,6 @@
 #include "paddle/phi/api/include/torch_like_api/c10/data_type.h"
 
 namespace c10 {
-// ScalarType
 #define FOREACH_PADDLE_AND_TORCH_DTYPES(_)            \
   _(uint8_t, UINT8, Byte)                             \
   _(int8_t, INT8, Char)                               \

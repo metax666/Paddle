@@ -30,12 +30,96 @@ struct PADDLE_API TensorOptions {
         has_pinned_memory_(false),
         has_memory_format_(false) {}
 
-  c10::ScalarType _PD_GetScalarType() const { return dtype; }
-  ::phi::Place _PD_GetPlace() const { return place; }
+  /* implicit */ TensorOptions(c10::ScalarType dtype)  // NOLINT
+      : TensorOptions() {
+    this->set_dtype(dtype);
+  }
+
+  TensorOptions dtype(std::optional<ScalarType> dtype) const noexcept {
+    TensorOptions r = *this;
+    r.set_dtype(dtype);
+    return r;
+  }
+
+  TensorOptions device(std::optional<Device> device) const noexcept {
+    TensorOptions r = *this;
+    r.set_device(device);
+    return r;
+  }
+
+  template <typename T>
+  TensorOptions& dtype() {
+    has_dtype_ = true;
+    return *this;
+  }
+
+  /// Mutably set the device of `TensorOptions`.
+  void set_device(std::optional<Device> device) & noexcept {
+    if (device) {
+      device_ = *device;
+      has_device_ = true;
+    } else {
+      has_device_ = false;
+    }
+  }
+
+  // legacy function to support ScalarType
+  void set_dtype(std::optional<ScalarType> dtype) & noexcept {
+    if (dtype) {
+      dtype_ = *dtype;
+      has_dtype_ = true;
+    } else {
+      has_dtype_ = false;
+    }
+  }
+
+  //   /// Mutably set the layout of `TensorOptions`.
+  //   void set_layout(std::optional<Layout> layout) & noexcept {
+  //     if (layout) {
+  //       layout_ = *layout;
+  //       has_layout_ = true;
+  //     } else {
+  //       has_layout_ = false;
+  //     }
+  //   }
+
+  /// Mutably set the `requires_grad` property of `TensorOptions`.
+  void set_requires_grad(std::optional<bool> requires_grad) & noexcept {
+    if (requires_grad) {
+      requires_grad_ = *requires_grad;
+      has_requires_grad_ = true;
+    } else {
+      has_requires_grad_ = false;
+    }
+  }
+
+  /// Mutably set the `pinned_memory` property of `TensorOptions`.
+  void set_pinned_memory(std::optional<bool> pinned_memory) & noexcept {
+    if (pinned_memory) {
+      pinned_memory_ = *pinned_memory;
+      has_pinned_memory_ = true;
+    } else {
+      has_pinned_memory_ = false;
+    }
+  }
+
+  //   /// Mutably set the `memory_Format` property of `TensorOptions`.
+  //   void set_memory_format(std::optional<MemoryFormat> memory_format) &
+  //   noexcept {
+  //     if (memory_format) {
+  //       memory_format_ = *memory_format;
+  //       has_memory_format_ = true;
+  //     } else {
+  //       has_memory_format_ = false;
+  //     }
+  //   }
+
+  c10::ScalarType _PD_GetScalarType() const { return dtype_; }
+  ::phi::Place _PD_GetPlace() const { return device_._PD_GetInner(); }
 
  private:
-  c10::ScalarType dtype = c10::ScalarType::Float;
-  ::phi::Place place = ::phi::CPUPlace();
+  Device device_ = c10::kCPU;
+  c10::ScalarType dtype_ = c10::ScalarType::Float;
   bool requires_grad_ : 1;
   bool pinned_memory_ : 1;
 

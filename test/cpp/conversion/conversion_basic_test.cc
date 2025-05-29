@@ -17,14 +17,16 @@
 #include "gtest/gtest.h"
 
 TEST(conversion_basic_test, BasicCase) {
-  at::Tensor a = at::ones({2, 3}, at::TensorOptions());
-  at::Tensor b = at::full({2, 3}, 2, at::ScalarType::Float);
+  at::Tensor a =
+      at::ones({2, 3}, at::TensorOptions().dtype(at::kFloat).device(at::kCPU));
+  at::Tensor b = at::full({2, 3}, 2, at::kFloat);
   double c = 10;
 
   TORCH_CHECK(a.sizes() == b.sizes());
   TORCH_CHECK(a.dtype() == at::kFloat);
   TORCH_CHECK(b.dtype() == at::kFloat);
-  // TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CPU);
+  TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CPU);
+  TORCH_INTERNAL_ASSERT(b.device().type() == at::DeviceType::CPU);
   at::Tensor a_contig = a.contiguous();
   at::Tensor b_contig = b.contiguous();
   at::Tensor result = at::empty(a_contig.sizes(), a_contig.options());

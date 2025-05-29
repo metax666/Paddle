@@ -15,6 +15,7 @@
 #pragma once
 
 #include "paddle/phi/api/include/tensor.h"
+#include "paddle/phi/api/include/torch_like_api/c10/device.h"
 #include "paddle/phi/api/include/torch_like_api/c10/memory_format.h"
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 #include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
@@ -53,6 +54,8 @@ class PADDLE_API Tensor {
   c10::ScalarType dtype() const {  // Should we use `TypeMeta` here?
     return compat::_PD_PhiDataTypeToAtenScalarType(tensor_.dtype());
   }
+
+  c10::Device device() const { return c10::Device(tensor_.place()); }
 
   at::Tensor contiguous(
       c10::MemoryFormat memory_format = c10::MemoryFormat::Contiguous) const {

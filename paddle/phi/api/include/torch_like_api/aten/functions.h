@@ -44,7 +44,6 @@ at::Tensor zeros(at::IntArrayRef size, at::TensorOptions options = {}) {
       compat::_PD_AtenScalarTypeToPhiDataType(options._PD_GetScalarType()),
       options._PD_GetPlace());
 }
-
 at::Tensor full(at::IntArrayRef size,
                 const at::Scalar& fill_value,
                 ::std::optional<at::ScalarType> dtype = {},
@@ -59,8 +58,10 @@ at::Tensor full(at::IntArrayRef size,
       fill_value,
       dtype.has_value() ? compat::_PD_AtenScalarTypeToPhiDataType(*dtype)
                         : phi::DataType::FLOAT32,
-      phi::CPUPlace()  // TODO(SigureMo): support other places
-  );
+      device.has_value() ? device.value()._PD_GetInner() : phi::CPUPlace());
+}
+at::Tensor abs(const at::Tensor& self) {
+  return paddle::experimental::abs(self._PD_GetInner());
 }
 
 }  // namespace at

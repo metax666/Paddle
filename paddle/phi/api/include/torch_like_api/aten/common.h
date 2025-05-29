@@ -16,6 +16,7 @@
 
 #include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
 #include "paddle/phi/api/include/torch_like_api/c10/data_type.h"
+#include "paddle/phi/api/include/torch_like_api/c10/device.h"
 #include "paddle/phi/api/include/torch_like_api/c10/exception.h"
 #include "paddle/phi/api/include/torch_like_api/c10/memory_format.h"
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
@@ -47,6 +48,13 @@ using c10::MemoryFormat;
 
 // Scalar
 using Scalar = paddle::experimental::Scalar;
-struct Device {};
+
+// Device
+using c10::Device;
+using c10::DeviceType;
+constexpr c10::DeviceType kCPU = c10::kCPU;
+constexpr c10::DeviceType kCUDA = c10::kCUDA;
+constexpr c10::DeviceType kCUSTOM = c10::kCUSTOM;  // Paddle only
+
 struct Layout {};
 }  // namespace at
