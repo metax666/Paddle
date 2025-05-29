@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+namespace compat {
+#define UNSUPPORTED_FEATURE_IN_PADDLE(feature) \
+  std::cerr << "Unsupported feature in Paddle: " << feature << std::endl;
+}  // namespace compat

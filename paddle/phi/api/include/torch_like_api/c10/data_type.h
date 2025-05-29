@@ -12,10 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+#include "paddle/phi/common/bfloat16.h"
+#include "paddle/phi/common/complex.h"
+#include "paddle/phi/common/data_type.h"
+#include "paddle/phi/common/float16.h"
+#include "paddle/phi/common/float8_e4m3fn.h"
+#include "paddle/phi/common/float8_e5m2.h"
+
+namespace c10 {
+template <typename T>
+using complex = ::phi::dtype::complex<T>;
+using Half = ::phi::dtype::float16;
+using Float8_e5m2 = ::phi::dtype::float8_e5m2;
+using Float8_e4m3fn = ::phi::dtype::float8_e4m3fn;
+using BFloat16 = ::phi::dtype::bfloat16;
+}  // namespace c10

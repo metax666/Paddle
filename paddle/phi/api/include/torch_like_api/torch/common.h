@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+#include "paddle/phi/api/include/torch_like_api/aten/common.h"
+#include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
+#include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
+
+namespace torch {
+using Tensor = at::Tensor;
+using Dtype = at::ScalarType;
+}  // namespace torch

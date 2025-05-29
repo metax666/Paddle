@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+#include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
+#include "paddle/phi/core/ddim.h"
+
+namespace compat {
+inline c10::IntArrayRef _PD_PhiDDimToIntArrayRef(const phi::DDim& ddim) {
+  return c10::IntArrayRef(ddim.Get(), ddim.size());
+}
+}  // namespace compat

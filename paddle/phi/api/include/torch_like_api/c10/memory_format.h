@@ -12,10 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+#include <cstdint>
+#include "paddle/common/macros.h"
+
+namespace c10 {
+enum class PADDLE_API MemoryFormat : int8_t {
+  Contiguous,
+  Preserve,
+  ChannelsLast,
+  ChannelsLast3d,
+  NumOptions
+};
+
+}

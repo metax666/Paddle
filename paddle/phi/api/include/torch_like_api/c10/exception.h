@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * torch compat runtime (ptrt)
- */
-
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+namespace c10 {
+#define TORCH_CHECK PD_CHECK
+#define TORCH_INTERNAL_ASSERT PD_CHECK
+}  // namespace c10
