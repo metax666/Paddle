@@ -19,6 +19,7 @@
 #include "paddle/phi/api/include/torch_like_api/c10/device.h"
 #include "paddle/phi/api/include/torch_like_api/c10/exception.h"
 #include "paddle/phi/api/include/torch_like_api/c10/memory_format.h"
+#include "paddle/phi/api/include/torch_like_api/c10/optional_array_ref.h"
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 #include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
 #include "paddle/phi/common/scalar.h"
@@ -29,8 +30,8 @@ namespace at {
 using c10::TensorOptions;
 
 // DataType
-using Half = c10::Half;
-using BFloat16 = c10::BFloat16;
+using c10::BFloat16;
+using c10::Half;
 
 // ScalarType
 using c10::ScalarType;
@@ -42,6 +43,9 @@ FOREACH_PADDLE_AND_TORCH_DTYPES(REDEFINE_CONSTANT_IN_AT)
 
 // IntArrayRef
 using c10::IntArrayRef;
+
+// OptionalIntArrayRef
+using c10::OptionalIntArrayRef;
 
 // MemoryFormat
 using c10::MemoryFormat;

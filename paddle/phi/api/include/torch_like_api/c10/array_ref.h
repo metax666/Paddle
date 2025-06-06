@@ -60,6 +60,8 @@ class ArrayRef {
     return Length == RHS.Length && std::equal(begin(), end(), RHS.begin());
   }
 
+  std::vector<T> vec() const { return std::vector<T>(Data, Data + Length); }
+
   const paddle::experimental::IntArray _PD_ToPaddleIntArray() const {
     return paddle::experimental::IntArray(Data, Length);
   }

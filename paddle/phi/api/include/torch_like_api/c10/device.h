@@ -25,6 +25,8 @@ struct Device final {
   Device(DeviceType type, DeviceIndex index = 0)
       : inner_(phi::Place(type, index)) {}  // NOLINT
 
+  DeviceIndex index() const noexcept { return inner_.GetDeviceId(); }
+
   DeviceType type() const { return inner_.GetType(); }
 
   phi::Place _PD_GetInner() const { return inner_; }

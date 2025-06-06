@@ -32,6 +32,18 @@ at::Tensor empty(
       compat::_PD_AtenScalarTypeToPhiDataType(options._PD_GetScalarType()),
       options._PD_GetPlace());
 }
+at::Tensor empty_like(
+    const at::Tensor& self,
+    at::TensorOptions options = {},
+    ::std::optional<at::MemoryFormat> memory_format = ::std::nullopt) {
+  if (memory_format.has_value()) {
+    UNSUPPORTED_FEATURE_IN_PADDLE("`MemoryFormat`")
+  }
+  return paddle::experimental::empty_like(
+      self._PD_GetInner(),
+      compat::_PD_AtenScalarTypeToPhiDataType(options._PD_GetScalarType()),
+      options._PD_GetPlace());
+}
 at::Tensor ones(at::IntArrayRef size, at::TensorOptions options = {}) {
   return paddle::experimental::ones(
       size._PD_ToPaddleIntArray(),
@@ -41,6 +53,18 @@ at::Tensor ones(at::IntArrayRef size, at::TensorOptions options = {}) {
 at::Tensor zeros(at::IntArrayRef size, at::TensorOptions options = {}) {
   return paddle::experimental::zeros(
       size._PD_ToPaddleIntArray(),
+      compat::_PD_AtenScalarTypeToPhiDataType(options._PD_GetScalarType()),
+      options._PD_GetPlace());
+}
+at::Tensor zeros_like(
+    const at::Tensor& self,
+    at::TensorOptions options = {},
+    ::std::optional<at::MemoryFormat> memory_format = ::std::nullopt) {
+  if (memory_format.has_value()) {
+    UNSUPPORTED_FEATURE_IN_PADDLE("`MemoryFormat`")
+  }
+  return paddle::experimental::zeros_like(
+      self._PD_GetInner(),
       compat::_PD_AtenScalarTypeToPhiDataType(options._PD_GetScalarType()),
       options._PD_GetPlace());
 }
@@ -62,6 +86,45 @@ at::Tensor full(at::IntArrayRef size,
 }
 at::Tensor abs(const at::Tensor& self) {
   return paddle::experimental::abs(self._PD_GetInner());
+}
+
+at::Tensor sum(const at::Tensor& self,
+               ::std::optional<at::ScalarType> dtype = ::std::nullopt) {
+  return paddle::experimental::sum(
+      self._PD_GetInner(),
+      {},
+      dtype.has_value() ? compat::_PD_AtenScalarTypeToPhiDataType(dtype.value())
+                        : phi::DataType::UNDEFINED,
+      /*keepdim=*/false);
+}
+at::Tensor& sum_out(at::Tensor& out,  // NOLINT
+                    const at::Tensor& self,
+                    ::std::optional<at::ScalarType> dtype = ::std::nullopt) {
+  auto res = sum(self, dtype);
+  paddle::experimental::assign_out_(res._PD_GetInner(), out._PD_GetInner());
+  return out;
+}
+
+at::Tensor sum(const at::Tensor& self,
+               at::OptionalIntArrayRef dim,
+               bool keepdim = false,
+               ::std::optional<at::ScalarType> dtype = ::std::nullopt) {
+  return paddle::experimental::sum(
+      self._PD_GetInner(),
+      dim.has_value() ? dim.value()._PD_ToPaddleIntArray()
+                      : paddle::experimental::IntArray(),
+      dtype.has_value() ? compat::_PD_AtenScalarTypeToPhiDataType(dtype.value())
+                        : phi::DataType::UNDEFINED,
+      keepdim);
+}
+at::Tensor& sum_out(at::Tensor& out,  // NOLINT
+                    const at::Tensor& self,
+                    at::OptionalIntArrayRef dim,
+                    bool keepdim = false,
+                    ::std::optional<at::ScalarType> dtype = ::std::nullopt) {
+  auto res = sum(self, dim, keepdim, dtype);
+  paddle::experimental::assign_out_(res._PD_GetInner(), out._PD_GetInner());
+  return out;
 }
 
 }  // namespace at

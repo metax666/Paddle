@@ -19,6 +19,36 @@
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 
 namespace torch {
-using Tensor = at::Tensor;
+using at::Tensor;
+using at::TensorOptions;
 using Dtype = at::ScalarType;
+
+/// Fixed width dtypes.
+constexpr auto kUInt8 = at::kByte;
+constexpr auto kInt8 = at::kChar;
+constexpr auto kInt16 = at::kShort;
+constexpr auto kInt32 = at::kInt;
+constexpr auto kInt64 = at::kLong;
+constexpr auto kUInt16 = at::kUInt16;
+constexpr auto kUInt32 = at::kUInt32;
+// constexpr auto kUInt64 = at::kUInt64; // missing in Paddle
+constexpr auto kFloat16 = at::kHalf;
+constexpr auto kFloat32 = at::kFloat;
+constexpr auto kFloat64 = at::kDouble;
+
+/// Rust-style short dtypes.
+constexpr auto kU8 = kUInt8;
+constexpr auto kU16 = kUInt16;
+constexpr auto kU32 = kUInt32;
+// constexpr auto kU64 = kUInt64; // missing in Paddle
+constexpr auto kI8 = kInt8;
+constexpr auto kI16 = kInt16;
+constexpr auto kI32 = kInt32;
+constexpr auto kI64 = kInt64;
+constexpr auto kF16 = kFloat16;
+constexpr auto kF32 = kFloat32;
+constexpr auto kF64 = kFloat64;
+
+using at::IntArrayRef;
+using at::OptionalIntArrayRef;
 }  // namespace torch
