@@ -61,4 +61,9 @@ constexpr c10::DeviceType kCUDA = c10::kCUDA;
 constexpr c10::DeviceType kCUSTOM = c10::kCUSTOM;  // Paddle only
 
 struct Layout {};
+
+// CUDA namespace
+namespace cuda {
+using c10::cuda::CUDAGuard;
+}
 }  // namespace at
