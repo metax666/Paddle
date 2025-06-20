@@ -15,6 +15,7 @@
 #pragma once
 
 #include "paddle/phi/api/include/torch_like_api/aten/common.h"
+#include "paddle/phi/api/include/torch_like_api/aten/functions.h"
 #include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 
@@ -51,4 +52,6 @@ constexpr auto kF64 = kFloat64;
 
 using at::IntArrayRef;
 using at::OptionalIntArrayRef;
+
+using at::empty;
 }  // namespace torch

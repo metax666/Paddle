@@ -23,6 +23,9 @@
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 #include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
 #include "paddle/phi/common/scalar.h"
+#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
+#include "paddle/phi/api/include/torch_like_api/c10/cuda_guard.h"
+#endif
 
 namespace at {
 
@@ -63,7 +66,9 @@ constexpr c10::DeviceType kCUSTOM = c10::kCUSTOM;  // Paddle only
 struct Layout {};
 
 // CUDA namespace
+#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
 namespace cuda {
 using c10::cuda::CUDAGuard;
 }
+#endif
 }  // namespace at
