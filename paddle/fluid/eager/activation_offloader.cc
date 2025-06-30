@@ -19,6 +19,7 @@
 #include "paddle/phi/core/memory/stats.h"
 
 COMMON_DECLARE_bool(offload_inplace_tensor);
+COMMON_DECLARE_bool(print_offload_info);
 
 namespace egr {
 
@@ -78,8 +79,10 @@ void ReloadFunctor::Reload() {
   }
   auto dst_place = offloader_->Place();
   if (dense_tensor->place() != dst_place) {
-    VLOG(6) << "Reload " << dense_tensor->place() << " -> " << dst_place
-            << " , " << GetTensorMetaString(dense_tensor);
+    if (FLAGS_print_offload_info) {
+      LOG(INFO) << "Reload " << dense_tensor->place() << " -> " << dst_place
+                << " , " << GetTensorMetaString(dense_tensor);
+    }
     PADDLE_ENFORCE_GPU_SUCCESS(cudaDeviceSynchronize());
     auto dst_holder = phi::memory_utils::AllocShared(dst_place, memory_size);
     phi::memory_utils::Copy(dst_holder->place(),
@@ -90,8 +93,6 @@ void ReloadFunctor::Reload() {
                             nullptr);
     dense_tensor->set_offset(0);
     dense_tensor->ResetHolder(std::move(dst_holder));
-  } else {
-    VLOG(10) << "Do not need to reload " << GetTensorMetaString(dense_tensor);
   }
 }
 
@@ -129,20 +130,20 @@ paddle::optional<ReloadFunctor> ActivationOffloaderWithPlace::Add(
     return paddle::none;
   }
   if (!dense_tensor->meta().is_contiguous()) {
-    VLOG(6) << "Offload skip non-contiguous tensor "
+    VLOG(7) << "Offload skip non-contiguous tensor "
             << GetTensorMetaString(dense_tensor)
             << " allocated: " << GetAllocatedMemory(place_);
     return paddle::none;
   }
   if (dense_tensor->offset() != 0) {
-    VLOG(6) << "Offload skip non-zero offset tensor "
+    VLOG(7) << "Offload skip non-zero offset tensor "
             << GetTensorMetaString(dense_tensor)
             << " allocated: " << GetAllocatedMemory(place_);
     return paddle::none;
   }
   if (!FLAGS_offload_inplace_tensor &&
       dense_tensor->InplaceVersionCounter().CurrentVersion() > 0) {
-    VLOG(6) << "Offload skip inplace tensor "
+    VLOG(7) << "Offload skip inplace tensor "
             << GetTensorMetaString(dense_tensor)
             << " allocated: " << GetAllocatedMemory(place_);
     return paddle::none;
@@ -170,14 +171,14 @@ size_t ActivationOffloaderWithPlace::Offload(size_t size) {
         1,
         phi::errors::InvalidArgument("Invalid reference count %d", cnt));
     if (ref_cnt > cnt) {
-      VLOG(6) << "Cannot offload tensor because its reference is not unique: "
+      VLOG(7) << "Cannot offload tensor because its reference is not unique: "
               << GetTensorMetaString(dense_tensor)
               << " , allocated: " << GetAllocatedMemory(place_)
               << " , desired_ref_cnt: " << cnt
               << " , actual_ref_cnt: " << ref_cnt;
       continue;
     } else if (cnt > 1) {
-      VLOG(6) << "Tensor with ref_cnt " << cnt << ": "
+      VLOG(7) << "Tensor with ref_cnt " << cnt << ": "
               << GetTensorMetaString(dense_tensor)
               << " , allocated: " << GetAllocatedMemory(place_)
               << " , desired_ref_cnt: " << cnt
@@ -196,10 +197,12 @@ size_t ActivationOffloaderWithPlace::Offload(size_t size) {
                             phi::DenseTensor *tensor,
                             size_t memory_size) -> size_t {
     if (memory_size == 0) return 0;
-    VLOG(6) << "Start to offload " << GetTensorMetaString(tensor)
-            << " , allocated: " << GetAllocatedMemory(place_)
-            << " , activation_number: " << activation_map.size()
-            << " , desired_size: " << size;
+    if (FLAGS_print_offload_info) {
+      LOG(INFO) << "Start to offload " << GetTensorMetaString(tensor)
+                << " , allocated: " << GetAllocatedMemory(place_)
+                << " , activation_number: " << activation_map.size()
+                << " , desired_size: " << size;
+    }
     auto start_time = std::chrono::high_resolution_clock::now();
     PADDLE_ENFORCE_GPU_SUCCESS(cudaDeviceSynchronize());
     auto dst_holder =
@@ -218,11 +221,14 @@ size_t ActivationOffloaderWithPlace::Offload(size_t size) {
                            .count() /
                        1e9;
     ++offload_cnt;
-    VLOG(6) << "End to offload " << GetTensorMetaString(tensor)
-            << " , time_cost: " << time_cost
-            << " , allocated: " << GetAllocatedMemory(place_)
-            << " , activation_number: " << activation_map.size() - offload_cnt
-            << " , desired_size: " << size;
+    if (FLAGS_print_offload_info) {
+      LOG(INFO) << "End to offload " << GetTensorMetaString(tensor)
+                << " , time_cost: " << time_cost
+                << " , allocated: " << GetAllocatedMemory(place_)
+                << " , activation_number: "
+                << activation_map.size() - offload_cnt
+                << " , desired_size: " << size;
+    }
     return memory_size;
   };
 
