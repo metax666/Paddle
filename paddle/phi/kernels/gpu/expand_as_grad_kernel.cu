@@ -23,7 +23,7 @@
 namespace phi {
 
 template <typename T, typename Context>
-void ExpandAsGradKernel(const Context& dev_ctx,
+void ExpandAsGradKernel(const Context& context,
                         const DenseTensor& x,
                         const DenseTensor& out_grad,
                         const std::vector<int64_t>& target_shape,
@@ -46,14 +46,14 @@ void ExpandAsGradKernel(const Context& dev_ctx,
                               "to 6, but the value received is %d.",
                               out_rank));
 
-  dev_ctx.template Alloc<T>(in_grad);
+  context.template Alloc<T>(in_grad);
   if (in_dims == out_dims) {
-    phi::Copy(dev_ctx, out_grad, dev_ctx.GetPlace(), false, in_grad);
+    phi::Copy(context, out_grad, context.GetPlace(), false, in_grad);
   } else {
     std::vector<int> reduce_dims = funcs::GetReduceDim(in_dims, out_dims, -1);
 
     phi::SumKernel<T, Context>(
-        dev_ctx, out_grad, reduce_dims, out_grad.dtype(), false, in_grad);
+        context, out_grad, reduce_dims, out_grad.dtype(), false, in_grad);
   }
 }
 

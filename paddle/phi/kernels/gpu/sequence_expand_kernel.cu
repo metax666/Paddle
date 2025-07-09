@@ -18,7 +18,7 @@
 namespace phi {
 
 template <typename T>
-static inline int ExpandByMemoryCopy(const phi::GPUContext& dev_ctx,
+static inline int ExpandByMemoryCopy(const phi::GPUContext& context,
                                      const DenseTensor& x,
                                      DenseTensor* out,
                                      const phi::Vector<size_t>& x_lod,
@@ -27,7 +27,7 @@ static inline int ExpandByMemoryCopy(const phi::GPUContext& dev_ctx,
   auto out_data = out->data<T>();
   auto x_data = x.data<T>();
 
-  const auto& gpu_place = dev_ctx.GetPlace();
+  const auto& gpu_place = context.GetPlace();
 
   int x_item_length = x.numel() / x.dims()[0];
   int out_offset = 0;
@@ -51,7 +51,7 @@ static inline int ExpandByMemoryCopy(const phi::GPUContext& dev_ctx,
                 gpu_place,
                 x_data + (x_start + k) * x_item_length,
                 sizeof(T) * x_item_length,
-                dev_ctx.stream());
+                context.stream());
           }
         }
       } else {
@@ -93,16 +93,16 @@ inline __global__ void sequence_expand_kernel(const T* x_data,
 
 template <typename T>
 struct SequenceExpandFunctor<phi::GPUContext, T> {
-  void operator()(const phi::GPUContext& dev_ctx,
+  void operator()(const phi::GPUContext& context,
                   const DenseTensor& x,
                   const phi::Vector<size_t>& x_lod,   /*expand source lod*/
                   const phi::Vector<size_t>& ref_lod, /*expand referenced lod*/
                   DenseTensor* out) {
     int num_copies =
-        ExpandByMemoryCopy<T>(dev_ctx, x, out, x_lod, ref_lod, false);
+        ExpandByMemoryCopy<T>(context, x, out, x_lod, ref_lod, false);
     // Sometimes direct copies will be faster, this maybe need deeply analysis.
     if (num_copies < 5) {
-      ExpandByMemoryCopy<T>(dev_ctx, x, out, x_lod, ref_lod, true);
+      ExpandByMemoryCopy<T>(context, x, out, x_lod, ref_lod, true);
     } else {
       int x_item_length = x.numel() / x.dims()[0];
       size_t x_lod_size = x_lod.size();
@@ -118,7 +118,7 @@ struct SequenceExpandFunctor<phi::GPUContext, T> {
 
       phi::MixVector<size_t> mixv_out_offset(&out_offset);
       const size_t* out_offset_data =
-          mixv_out_offset.CUDAData(dev_ctx.GetPlace());
+          mixv_out_offset.CUDAData(context.GetPlace());
       const size_t* x_lod_data = out_offset_data + x_lod_size;
       const size_t* ref_lod_data = out_offset_data + 2 * x_lod_size;
 
@@ -130,14 +130,14 @@ struct SequenceExpandFunctor<phi::GPUContext, T> {
       dim3 block_size(thread_x, thread_y, thread_z);
       dim3 grid_size(block_x, 1);
 
-      sequence_expand_kernel<<<grid_size, block_size, 0, dev_ctx.stream()>>>(
+      sequence_expand_kernel<<<grid_size, block_size, 0, context.stream()>>>(
           x.data<T>(),
           x_lod_data,
           ref_lod_data,
           out_offset_data,
           x_lod_size,
           x_item_length,
-          dev_ctx.template Alloc<T>(out));
+          context.template Alloc<T>(out));
     }
   }
 };
