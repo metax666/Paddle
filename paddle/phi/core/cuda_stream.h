@@ -30,6 +30,10 @@ using gpuStream_t = hipStream_t;
 
 #include "paddle/phi/core/enforce.h"
 
+#include "paddle/common/flags.h"
+
+COMMON_DECLARE_bool(use_default_stream);
+
 namespace phi {
 
 // Currently, CudaStream is used in python-side API only
@@ -45,7 +49,9 @@ class CUDAStream {
       : place_(place), stream_(stream) {}
   CUDAStream(const Place& place,
              const int priority = 0,
-             const StreamFlag& flag = StreamFlag::kDefaultFlag);
+             const StreamFlag& flag = FLAGS_use_default_stream
+                                          ? StreamFlag::kStreamNonBlocking
+                                          : StreamFlag::kDefaultFlag);
 
   gpuStream_t raw_stream() const { return reinterpret_cast<gpuStream_t>(id()); }
 
