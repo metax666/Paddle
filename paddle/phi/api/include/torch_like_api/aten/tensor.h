@@ -30,14 +30,18 @@ using PaddleTensor = paddle::Tensor;
 
 class PADDLE_API Tensor {
  public:
+  Tensor() = default;
   Tensor(const PaddleTensor& tensor) : tensor_(tensor){};  // NOLINT
 
-  void* data_ptr() { return tensor_.data(); }
+  void* data_ptr() const { return const_cast<void*>(tensor_.data()); }
   template <typename T>
   T* data_ptr() const {
     return const_cast<T*>(tensor_.data<T>());
   }
   int64_t stride(int64_t dim) const {
+    if (dim < 0) {
+      dim += tensor_.strides().size();
+    }
     return tensor_.strides()[static_cast<int>(dim)];
   }
   c10::IntArrayRef strides() const {

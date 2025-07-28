@@ -114,6 +114,18 @@ struct PADDLE_API TensorOptions {
   //     }
   //   }
 
+  std::optional<c10::ScalarType> dtype_opt() const noexcept {
+    return has_dtype_ ? std::make_optional(dtype_) : std::nullopt;
+  }
+
+  // std::optional<Layout> layout_opt() const noexcept {
+  //   return has_layout_ ? std::make_optional(layout_) : std::nullopt;
+  // }
+
+  std::optional<Device> device_opt() const noexcept {
+    return has_device_ ? std::make_optional(device_) : std::nullopt;
+  }
+
   c10::ScalarType _PD_GetScalarType() const { return dtype_; }
   ::phi::Place _PD_GetPlace() const { return device_._PD_GetInner(); }
 

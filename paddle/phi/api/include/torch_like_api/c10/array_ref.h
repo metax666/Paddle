@@ -15,7 +15,10 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <iterator>
+#include <functional>
 #include "paddle/phi/common/int_array.h"
+#include "paddle/phi/api/include/torch_like_api/c10/exception.h"
 
 namespace c10 {
 template <typename T>
@@ -55,6 +58,69 @@ class ArrayRef {
 
   constexpr iterator begin() const { return Data; }
   constexpr iterator end() const { return Data + Length; }
+
+  // These are actually the same as iterator, since ArrayRef only
+  // gives you const iterators.
+  constexpr const_iterator cbegin() const {
+    return Data;
+  }
+  constexpr const_iterator cend() const {
+    return Data + Length;
+  }
+
+  constexpr reverse_iterator rbegin() const {
+    return reverse_iterator(end());
+  }
+  constexpr reverse_iterator rend() const {
+    return reverse_iterator(begin());
+  }
+
+  /// Check if all elements in the array satisfy the given expression
+  constexpr bool allMatch(const std::function<bool(const T&)>& pred) const {
+    return std::all_of(cbegin(), cend(), pred);
+  }
+
+  /// empty - Check if the array is empty.
+  constexpr bool empty() const {
+    return Length == 0;
+  }
+
+  constexpr const T* data() const {
+    return Data;
+  }
+
+  /// size - Get the array size.
+  constexpr size_t size() const {
+    return Length;
+  }
+
+  /// front - Get the first element.
+  constexpr const T& front() const {
+    TORCH_CHECK(
+        !empty(), "ArrayRef: attempted to access front() of empty list");
+    return Data[0];
+  }
+
+  /// back - Get the last element.
+  constexpr const T& back() const {
+    TORCH_CHECK(!empty(), "ArrayRef: attempted to access back() of empty list");
+    return Data[Length - 1];
+  }
+
+  constexpr const T& operator[](size_t Index) const {
+    return Data[Index];
+  }
+
+  /// Vector compatibility
+  constexpr const T& at(size_t Index) const {
+    TORCH_CHECK(
+        Index < Length,
+        "ArrayRef: invalid index Index = ",
+        Index,
+        "; Length = ",
+        Length);
+    return Data[Index];
+  }
 
   constexpr bool equals(ArrayRef RHS) const {
     return Length == RHS.Length && std::equal(begin(), end(), RHS.begin());

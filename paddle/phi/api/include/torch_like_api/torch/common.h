@@ -36,6 +36,7 @@ constexpr auto kUInt32 = at::kUInt32;
 constexpr auto kFloat16 = at::kHalf;
 constexpr auto kFloat32 = at::kFloat;
 constexpr auto kFloat64 = at::kDouble;
+constexpr auto kBFloat16 = at::kBFloat16;
 
 /// Rust-style short dtypes.
 constexpr auto kU8 = kUInt8;
@@ -50,8 +51,13 @@ constexpr auto kF16 = kFloat16;
 constexpr auto kF32 = kFloat32;
 constexpr auto kF64 = kFloat64;
 
+constexpr auto kCPU = at::kCPU;
+constexpr auto kCUDA = at::kCUDA;
+
 using at::IntArrayRef;
 using at::OptionalIntArrayRef;
 
 using at::empty;
+using at::empty_like;
+using at::zeros;
 }  // namespace torch
