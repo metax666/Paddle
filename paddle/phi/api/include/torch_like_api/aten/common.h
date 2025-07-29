@@ -15,6 +15,9 @@
 #pragma once
 
 #include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
+#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAException.h"
+#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAStream.h"
+#include "paddle/phi/api/include/torch_like_api/c10/cuda/PhiloxCudaState.h"
 #include "paddle/phi/api/include/torch_like_api/c10/data_type.h"
 #include "paddle/phi/api/include/torch_like_api/c10/device.h"
 #include "paddle/phi/api/include/torch_like_api/c10/exception.h"
@@ -22,9 +25,6 @@
 #include "paddle/phi/api/include/torch_like_api/c10/optional_array_ref.h"
 #include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
 #include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAException.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/PhiloxCudaState.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAStream.h"
 #include "paddle/phi/common/scalar.h"
 #if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
 #include "paddle/phi/api/include/torch_like_api/c10/cuda_guard.h"

@@ -14,11 +14,11 @@
 
 #pragma once
 #include <cstdint>
-#include <vector>
-#include <iterator>
 #include <functional>
-#include "paddle/phi/common/int_array.h"
+#include <iterator>
+#include <vector>
 #include "paddle/phi/api/include/torch_like_api/c10/exception.h"
+#include "paddle/phi/common/int_array.h"
 
 namespace c10 {
 template <typename T>
@@ -61,19 +61,11 @@ class ArrayRef {
 
   // These are actually the same as iterator, since ArrayRef only
   // gives you const iterators.
-  constexpr const_iterator cbegin() const {
-    return Data;
-  }
-  constexpr const_iterator cend() const {
-    return Data + Length;
-  }
+  constexpr const_iterator cbegin() const { return Data; }
+  constexpr const_iterator cend() const { return Data + Length; }
 
-  constexpr reverse_iterator rbegin() const {
-    return reverse_iterator(end());
-  }
-  constexpr reverse_iterator rend() const {
-    return reverse_iterator(begin());
-  }
+  constexpr reverse_iterator rbegin() const { return reverse_iterator(end()); }
+  constexpr reverse_iterator rend() const { return reverse_iterator(begin()); }
 
   /// Check if all elements in the array satisfy the given expression
   constexpr bool allMatch(const std::function<bool(const T&)>& pred) const {
@@ -81,23 +73,17 @@ class ArrayRef {
   }
 
   /// empty - Check if the array is empty.
-  constexpr bool empty() const {
-    return Length == 0;
-  }
+  constexpr bool empty() const { return Length == 0; }
 
-  constexpr const T* data() const {
-    return Data;
-  }
+  constexpr const T* data() const { return Data; }
 
   /// size - Get the array size.
-  constexpr size_t size() const {
-    return Length;
-  }
+  constexpr size_t size() const { return Length; }
 
   /// front - Get the first element.
   constexpr const T& front() const {
-    TORCH_CHECK(
-        !empty(), "ArrayRef: attempted to access front() of empty list");
+    TORCH_CHECK(!empty(),
+                "ArrayRef: attempted to access front() of empty list");
     return Data[0];
   }
 
@@ -107,18 +93,15 @@ class ArrayRef {
     return Data[Length - 1];
   }
 
-  constexpr const T& operator[](size_t Index) const {
-    return Data[Index];
-  }
+  constexpr const T& operator[](size_t Index) const { return Data[Index]; }
 
   /// Vector compatibility
   constexpr const T& at(size_t Index) const {
-    TORCH_CHECK(
-        Index < Length,
-        "ArrayRef: invalid index Index = ",
-        Index,
-        "; Length = ",
-        Length);
+    TORCH_CHECK(Index < Length,
+                "ArrayRef: invalid index Index = ",
+                Index,
+                "; Length = ",
+                Length);
     return Data[Index];
   }
 
