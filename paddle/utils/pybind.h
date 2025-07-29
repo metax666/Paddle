@@ -15,6 +15,7 @@
 #pragma once
 
 #include "paddle/phi/api/include/tensor.h"
+#include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
 #ifdef PADDLE_WITH_DISTRIBUTE
 #include "paddle/phi/core/distributed/auto_parallel/dist_tensor.h"
 #endif
@@ -126,6 +127,40 @@ struct optional_caster<paddle::optional<paddle::Tensor>> {
 
   PYBIND11_TYPE_CASTER(paddle::optional<paddle::Tensor>,
                        const_name("Optional[paddle::Tensor]"));
+};
+
+template <>
+struct type_caster<at::Tensor> {
+ public:
+  PYBIND11_TYPE_CASTER(at::Tensor, _("at::Tensor"));
+
+  bool load(handle src, bool) {
+    paddle::pybind::EnableTensorOperantsToPhiMode();
+    PyObject* obj = src.ptr();
+    if (paddle::pybind::PyCheckTensor(obj)) {
+      value = paddle::pybind::CastPyArg2Tensor(obj, 0);
+      return true;
+    }
+    return false;
+  }
+
+  static handle cast(const at::Tensor& src,
+                     return_value_policy /* policy */,
+                     handle /* parent */) {
+    const auto& src_pd_tensor = src._PD_GetInner();
+    // TODO(GhostScreaming): pipeline parallel may return a uninitialized
+    // DistTensor, it should not return None.
+#ifdef PADDLE_WITH_DISTRIBUTE
+    bool return_none =
+        phi::distributed::DistTensor::classof(src_pd_tensor.impl().get())
+            ? false
+            : true;
+#else
+    bool return_none = true;
+#endif
+    return handle(paddle::pybind::ToPyObject(
+        src_pd_tensor, return_none /* return_py_none_if_not_initialize */));
+  }
 };
 
 // Pybind11 bindings for optional types.

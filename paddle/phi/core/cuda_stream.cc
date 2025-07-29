@@ -12,11 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
 #include "paddle/phi/core/cuda_stream.h"
+#endif
 
 #include "glog/logging.h"
 
 namespace phi {
+
+#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
 
 CUDAStream::CUDAStream(const Place& place,
                        const int priority,
@@ -97,5 +101,7 @@ CUDAStream::~CUDAStream() {
 #endif
   }
 }
+
+#endif
 
 }  // namespace phi
