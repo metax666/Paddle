@@ -15,7 +15,7 @@
 #pragma once
 
 #include "paddle/common/macros.h"
-#include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
+#include <c10/scalar_type.h>
 #include "paddle/phi/common/place.h"
 
 namespace c10 {

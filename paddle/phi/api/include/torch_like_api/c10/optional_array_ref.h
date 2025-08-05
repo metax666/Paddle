@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
-#include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
+#include <c10/util/ArrayRef.h>
 
 namespace c10 {
 template <typename T>

@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/aten/common.h"
-#include "paddle/phi/api/include/torch_like_api/aten/functions.h"
-#include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
-#include "paddle/phi/api/include/torch_like_api/torch/common.h"
+#include <ATen/common.h>
+#include <ATen/functions.h>
+#include <ATen/tensor.h>
+#include <torch/common.h>

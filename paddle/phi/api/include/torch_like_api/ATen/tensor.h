@@ -16,13 +16,13 @@
 
 #include "paddle/phi/api/include/api.h"
 #include "paddle/phi/api/include/tensor.h"
-#include "paddle/phi/api/include/torch_like_api/aten/common.h"
-#include "paddle/phi/api/include/torch_like_api/c10/device.h"
-#include "paddle/phi/api/include/torch_like_api/c10/memory_format.h"
-#include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
-#include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
-#include "paddle/phi/api/include/torch_like_api/compat/int_array_ref_conversion.h"
-#include "paddle/phi/api/include/torch_like_api/compat/scalar_type_conversion.h"
+#include <ATen/common.h>
+#include <c10/device.h>
+#include <c10/core/MemoryFormat.h>
+#include <c10/scalar_type.h>
+#include <c10/tensor_options.h>
+#include <compat/int_array_ref_conversion.h>
+#include <compat/scalar_type_conversion.h>
 #include "paddle/phi/common/place.h"
 
 namespace at {

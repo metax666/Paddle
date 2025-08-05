@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #pragma once
-#include "paddle/phi/api/include/torch_like_api/c10/device.h"
+#include <c10/device.h>
 #include "paddle/phi/core/platform/cuda_device_guard.h"
 
 namespace c10::cuda {

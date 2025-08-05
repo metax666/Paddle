@@ -15,7 +15,7 @@
 #pragma once
 
 #include "paddle/phi/api/include/tensor.h"
-#include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
+#include <ATen/tensor.h>
 #ifdef PADDLE_WITH_DISTRIBUTE
 #include "paddle/phi/core/distributed/auto_parallel/dist_tensor.h"
 #endif

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #pragma once
-#include "paddle/phi/api/include/torch_like_api/c10/exception.h"
-#include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
-#include "paddle/phi/api/include/torch_like_api/compat/macros.h"
+#include <c10/exception.h>
+#include <c10/scalar_type.h>
+#include <compat/macros.h>
 #include "paddle/phi/common/data_type.h"
 
 namespace compat {

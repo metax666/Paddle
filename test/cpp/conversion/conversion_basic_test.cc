@@ -15,7 +15,7 @@
 #include "paddle/phi/api/include/torch_compat_runtime.h"
 
 #include "gtest/gtest.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda_guard.h"
+#include <c10/cuda_guard.h>
 
 TEST(conversion_basic_test, BasicCase) {
   at::Tensor a =

@@ -18,4 +18,4 @@
 
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/torch/api.h"
+#include <torch/api.h>

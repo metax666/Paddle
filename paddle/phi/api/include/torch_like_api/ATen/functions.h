@@ -15,8 +15,8 @@
 #pragma once
 
 #include "paddle/phi/api/include/api.h"
-#include "paddle/phi/api/include/torch_like_api/aten/common.h"
-#include "paddle/phi/api/include/torch_like_api/aten/tensor.h"
+#include <ATen/common.h>
+#include <ATen/tensor.h>
 
 namespace at {
 

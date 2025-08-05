@@ -15,7 +15,7 @@
 #pragma once
 
 #include "paddle/common/macros.h"
-#include "paddle/phi/api/include/torch_like_api/c10/data_type.h"
+#include <c10/data_type.h>
 
 namespace c10 {
 #define FOREACH_PADDLE_AND_TORCH_DTYPES(_)            \

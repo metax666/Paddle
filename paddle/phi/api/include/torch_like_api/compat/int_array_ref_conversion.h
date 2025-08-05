@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
+#include <c10/util/ArrayRef.h>
 #include "paddle/phi/core/ddim.h"
 
 namespace compat {

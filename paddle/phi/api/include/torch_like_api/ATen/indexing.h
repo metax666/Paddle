@@ -15,7 +15,7 @@
 #pragma once
 #include <cstdint>
 #include <optional>
-#include "paddle/phi/api/include/torch_like_api/c10/symint.h"
+#include <c10/symint.h>
 
 namespace at::indexing {
 

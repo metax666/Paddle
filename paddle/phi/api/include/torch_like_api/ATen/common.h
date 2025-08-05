@@ -14,20 +14,20 @@
 
 #pragma once
 
-#include "paddle/phi/api/include/torch_like_api/c10/array_ref.h"
-#include "paddle/phi/api/include/torch_like_api/c10/data_type.h"
-#include "paddle/phi/api/include/torch_like_api/c10/device.h"
-#include "paddle/phi/api/include/torch_like_api/c10/exception.h"
-#include "paddle/phi/api/include/torch_like_api/c10/memory_format.h"
-#include "paddle/phi/api/include/torch_like_api/c10/optional_array_ref.h"
-#include "paddle/phi/api/include/torch_like_api/c10/scalar_type.h"
-#include "paddle/phi/api/include/torch_like_api/c10/tensor_options.h"
+#include <c10/util/ArrayRef.h>
+#include <c10/data_type.h>
+#include <c10/device.h>
+#include <c10/exception.h>
+#include <c10/core/MemoryFormat.h>
+#include <c10/optional_array_ref.h>
+#include <c10/scalar_type.h>
+#include <c10/tensor_options.h>
 #include "paddle/phi/common/scalar.h"
 #if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAException.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/CUDAStream.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda/PhiloxCudaState.h"
-#include "paddle/phi/api/include/torch_like_api/c10/cuda_guard.h"
+#include <c10/cuda/CUDAException.h>
+#include <c10/cuda/CUDAStream.h>
+#include <c10/cuda/PhiloxCudaState.h>
+#include <c10/cuda_guard.h>
 #endif
 
 namespace at {

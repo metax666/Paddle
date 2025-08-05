@@ -599,6 +599,7 @@ if(WITH_PROFILER)
 endif()
 
 include_directories("${PADDLE_SOURCE_DIR}")
+include_directories("${PADDLE_SOURCE_DIR}/paddle/phi/api/include/torch_like_api/")
 
 if(WITH_NV_JETSON)
   set(WITH_ARM
