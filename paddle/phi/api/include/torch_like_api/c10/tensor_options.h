@@ -14,9 +14,12 @@
 
 #pragma once
 
+#include <c10/core/ScalarType.h>
+
 #include "paddle/common/macros.h"
-#include <c10/scalar_type.h>
 #include "paddle/phi/common/place.h"
+
+#include <optional>
 
 namespace c10 {
 struct PADDLE_API TensorOptions {

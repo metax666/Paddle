@@ -15,12 +15,11 @@
 #pragma once
 
 #include <c10/util/ArrayRef.h>
-#include <c10/data_type.h>
-#include <c10/device.h>
+#include <c10/core/Device.h>
 #include <c10/exception.h>
 #include <c10/core/MemoryFormat.h>
 #include <c10/optional_array_ref.h>
-#include <c10/scalar_type.h>
+#include <c10/core/ScalarType.h>
 #include <c10/tensor_options.h>
 #include "paddle/phi/common/scalar.h"
 #if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)

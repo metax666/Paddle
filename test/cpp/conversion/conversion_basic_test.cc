@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include <c10/cuda_guard.h>
+#include <ATen/cuda/EmptyTensor.h>
 
 TEST(conversion_basic_test, BasicCase) {
   at::Tensor a =
@@ -43,4 +44,6 @@ TEST(conversion_basic_test, BasicCase) {
               << std::endl;
     ASSERT_EQ(result_ptr[i], 12);
   }
+  at::Tensor bb = at::detail::empty_cuda(12, at::kFloat, at::kCUDA, std::nullopt);
+
 }

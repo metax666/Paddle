@@ -17,9 +17,10 @@
 #include "paddle/phi/api/include/api.h"
 #include "paddle/phi/api/include/tensor.h"
 #include <ATen/common.h>
-#include <c10/device.h>
+#include <c10/core/Device.h>
+#include <ATen/core/TensorBase.h>
 #include <c10/core/MemoryFormat.h>
-#include <c10/scalar_type.h>
+#include <c10/core/ScalarType.h>
 #include <c10/tensor_options.h>
 #include <compat/int_array_ref_conversion.h>
 #include <compat/scalar_type_conversion.h>
@@ -28,7 +29,7 @@
 namespace at {
 using PaddleTensor = paddle::Tensor;
 
-class PADDLE_API Tensor {
+class PADDLE_API Tensor : public TensorBase {
  public:
   Tensor() = default;
   Tensor(const PaddleTensor& tensor) : tensor_(tensor){};  // NOLINT

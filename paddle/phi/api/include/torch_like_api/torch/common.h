@@ -17,7 +17,7 @@
 #include <ATen/common.h>
 #include <ATen/functions.h>
 #include <ATen/tensor.h>
-#include <c10/scalar_type.h>
+#include <c10/core/ScalarType.h>
 
 namespace torch {
 using at::Tensor;

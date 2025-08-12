@@ -15,7 +15,7 @@
 #pragma once
 
 #include "paddle/phi/api/include/context_pool.h"
-#include <c10/device.h>
+#include <c10/core/Device.h>
 #include "paddle/phi/backends/gpu/gpu_context.h"
 #include "paddle/phi/backends/gpu/gpu_info.h"
 #include "paddle/phi/core/cuda_stream.h"
