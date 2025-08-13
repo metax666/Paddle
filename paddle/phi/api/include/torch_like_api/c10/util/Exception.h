@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #pragma once
+#include "paddle/common/exception.h"
 
 namespace c10 {
 #define TORCH_CHECK PD_CHECK

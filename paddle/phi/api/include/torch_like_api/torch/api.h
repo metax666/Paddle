@@ -16,5 +16,4 @@
 
 #include <ATen/common.h>
 #include <ATen/functions.h>
-#include <ATen/tensor.h>
-#include <torch/common.h>
+#include <torch/csrc/api/include/torch/types.h>

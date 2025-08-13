@@ -13,11 +13,11 @@
 // limitations under the License.
 
 #pragma once
+#include <c10/util/Exception.h>
 #include <cstdint>
 #include <functional>
 #include <iterator>
 #include <vector>
-#include <c10/exception.h>
 #include "paddle/phi/common/int_array.h"
 
 namespace c10 {
@@ -51,36 +51,34 @@ class ArrayRef {
   constexpr ArrayRef(const T* begin, const T* end)
       : Data(begin), Length(end - begin) {}
 
-  template <
-      typename Container,
-      typename U = decltype(std::declval<Container>().data()),
-      typename = std::enable_if_t<
-          (std::is_same_v<U, T*> || std::is_same_v<U, T const*>)>>
-  /* implicit */ ArrayRef(const Container& container)
-      : Data(container.data()), Length(container.size()) {
-  }
+  template <typename Container,
+            typename U = decltype(std::declval<Container>().data()),
+            typename = std::enable_if_t<(std::is_same_v<U, T*> ||
+                                         std::is_same_v<U, T const*>)>>
+  /* implicit */ ArrayRef(const Container& container)  // NOLINT
+      : Data(container.data()), Length(container.size()) {}
 
-    /// Construct an ArrayRef from a std::vector.
+  /// Construct an ArrayRef from a std::vector.
   // The enable_if stuff here makes sure that this isn't used for
   // std::vector<bool>, because ArrayRef can't work on a std::vector<bool>
   // bitfield.
   template <typename A>
-  /* implicit */ ArrayRef(const std::vector<T, A>& Vec)
+  /* implicit */ ArrayRef(const std::vector<T, A>& Vec)  // NOLINT
       : Data(Vec.data()), Length(Vec.size()) {
-    static_assert(
-        !std::is_same_v<T, bool>,
-        "ArrayRef<bool> cannot be constructed from a std::vector<bool> bitfield.");
+    static_assert(!std::is_same_v<T, bool>,
+                  "ArrayRef<bool> cannot be constructed from a "
+                  "std::vector<bool> bitfield.");
   }
-  
-    /// Construct an ArrayRef from a std::array
+
+  /// Construct an ArrayRef from a std::array
   template <size_t N>
-  /* implicit */ constexpr ArrayRef(const std::array<T, N>& Arr)
+  /* implicit */ constexpr ArrayRef(const std::array<T, N>& Arr)  // NOLINT
       : Data(Arr.data()), Length(N) {}
 
   /// Construct an ArrayRef from a C array.
   template <size_t N>
-  // NOLINTNEXTLINE(*c-arrays*)
-  /* implicit */ constexpr ArrayRef(const T (&Arr)[N]) : Data(Arr), Length(N) {}
+  /* implicit */ constexpr ArrayRef(const T (&Arr)[N])  // NOLINT
+      : Data(Arr), Length(N) {}
 
   /// Construct an ArrayRef from a std::initializer_list.
   /* implicit */ constexpr ArrayRef(const std::initializer_list<T>& Vec)
@@ -132,14 +130,13 @@ class ArrayRef {
 
   /// slice(n, m) - Take M elements of the array starting at element N
   constexpr ArrayRef<T> slice(size_t N, size_t M) const {
-    TORCH_CHECK(
-        N + M <= size(),
-        "ArrayRef: invalid slice, N = ",
-        N,
-        "; M = ",
-        M,
-        "; size = ",
-        size());
+    TORCH_CHECK(N + M <= size(),
+                "ArrayRef: invalid slice, N = ",
+                N,
+                "; M = ",
+                M,
+                "; size = ",
+                size());
     return ArrayRef<T>(data() + N, M);
   }
 
@@ -168,7 +165,6 @@ class ArrayRef {
   /// continues to select the move assignment operator.
   template <typename U>
   std::enable_if_t<std::is_same_v<U, T>, ArrayRef<T>>& operator=(
-      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
       U&& Temporary) = delete;
 
   /// Disallow accidental assignment from a temporary.
@@ -218,3 +214,11 @@ bool operator!=(c10::ArrayRef<T> a1, const std::vector<T>& a2) {
 using IntArrayRef = ArrayRef<int64_t>;
 
 }  // namespace c10
+
+namespace at {
+using c10::ArrayRef;
+}  // namespace at
+
+namespace torch {
+using c10::ArrayRef;
+}  // namespace torch

@@ -1,3 +1,17 @@
+// Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
 #include <c10/core/Device.h>
@@ -8,7 +22,7 @@
 // #include <c10/core/Storage.h>
 #include <c10/core/SymIntArrayRef.h>
 // #include <c10/core/TensorImpl.h>
-#include <c10/tensor_options.h>
+#include <c10/core/TensorOptions.h>
 // #include <c10/core/UndefinedTensorImpl.h>
 // #include <c10/core/WrapDimMinimal.h>
 // #include <c10/util/C++17.h>
@@ -40,16 +54,18 @@ class Tensor;
 class TensorBase;
 
 class TensorBase {
-//  public:
-//   struct unsafe_borrow_t { explicit unsafe_borrow_t() = default; };
+  //  public:
+  //   struct unsafe_borrow_t { explicit unsafe_borrow_t() = default; };
 
-//  protected:
-//   // Create a Tensor with a +0 reference count. Special care must be
-//   // taken to avoid decrementing this reference count at destruction
-//   // time. Intended to support MaybeOwnedTraits<Tensor>.
-//   explicit TensorBase(unsafe_borrow_t, const TensorBase& rhs)
-//       : impl_(c10::intrusive_ptr<at::TensorImpl, UndefinedTensorImpl>(rhs.impl_.get(), c10::raw::DontIncreaseRefcount{})) {}
-//   friend MaybeOwnedTraits<TensorBase>;
+  //  protected:
+  //   // Create a Tensor with a +0 reference count. Special care must be
+  //   // taken to avoid decrementing this reference count at destruction
+  //   // time. Intended to support MaybeOwnedTraits<Tensor>.
+  //   explicit TensorBase(unsafe_borrow_t, const TensorBase& rhs)
+  //       : impl_(c10::intrusive_ptr<at::TensorImpl,
+  //       UndefinedTensorImpl>(rhs.impl_.get(),
+  //       c10::raw::DontIncreaseRefcount{})) {}
+  //   friend MaybeOwnedTraits<TensorBase>;
 
  public:
   TensorBase() = default;
@@ -67,4 +83,4 @@ class TensorBase {
   ~TensorBase() noexcept = default;
 };
 
-} // namespace at
+}  // namespace at

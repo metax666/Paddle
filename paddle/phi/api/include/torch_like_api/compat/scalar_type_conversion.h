@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #pragma once
-#include <c10/exception.h>
 #include <c10/core/ScalarType.h>
+#include <c10/util/Exception.h>
 #include <compat/macros.h>
 #include "paddle/phi/common/data_type.h"
 

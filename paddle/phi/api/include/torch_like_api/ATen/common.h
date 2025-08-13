@@ -14,13 +14,13 @@
 
 #pragma once
 
-#include <c10/util/ArrayRef.h>
 #include <c10/core/Device.h>
-#include <c10/exception.h>
 #include <c10/core/MemoryFormat.h>
-#include <c10/optional_array_ref.h>
 #include <c10/core/ScalarType.h>
-#include <c10/tensor_options.h>
+#include <c10/core/TensorOptions.h>
+#include <c10/optional_array_ref.h>
+#include <c10/util/ArrayRef.h>
+#include <c10/util/Exception.h>
 #include "paddle/phi/common/scalar.h"
 #if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
 #include <c10/cuda/CUDAException.h>
@@ -64,8 +64,6 @@ using c10::DeviceType;
 constexpr c10::DeviceType kCPU = c10::kCPU;
 constexpr c10::DeviceType kCUDA = c10::kCUDA;
 constexpr c10::DeviceType kCUSTOM = c10::kCUSTOM;  // Paddle only
-
-struct Layout {};
 
 // CUDA namespace
 #if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)

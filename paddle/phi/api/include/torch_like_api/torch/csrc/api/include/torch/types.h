@@ -20,8 +20,19 @@
 #include <c10/core/ScalarType.h>
 
 namespace torch {
+
+using at::IntArrayRef;
+using at::OptionalIntArrayRef;
 using at::Tensor;
 using at::TensorOptions;
+
+using at::empty;
+using at::empty_like;
+using at::zeros;
+
+using std::nullopt;   // NOLINT
+using std::optional;  // NOLINT
+
 using Dtype = at::ScalarType;
 
 /// Fixed width dtypes.
@@ -54,10 +65,4 @@ constexpr auto kF64 = kFloat64;
 constexpr auto kCPU = at::kCPU;
 constexpr auto kCUDA = at::kCUDA;
 
-using at::IntArrayRef;
-using at::OptionalIntArrayRef;
-
-using at::empty;
-using at::empty_like;
-using at::zeros;
 }  // namespace torch

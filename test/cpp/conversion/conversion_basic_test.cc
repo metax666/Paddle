@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "paddle/phi/api/include/torch_compat_runtime.h"
+#include <ATen/cuda/EmptyTensor.h>
+#include <c10/core/ScalarType.h>
+#include <c10/core/SymInt.h>
+#include <c10/core/TensorOptions.h>
+#include <c10/cuda_guard.h>
 
 #include "gtest/gtest.h"
-#include <c10/cuda_guard.h>
-#include <ATen/cuda/EmptyTensor.h>
+#include "paddle/phi/api/include/torch_compat_runtime.h"
+#include "paddle/phi/common/float16.h"
 
 TEST(conversion_basic_test, BasicCase) {
   at::Tensor a =
@@ -44,6 +48,25 @@ TEST(conversion_basic_test, BasicCase) {
               << std::endl;
     ASSERT_EQ(result_ptr[i], 12);
   }
-  at::Tensor bb = at::detail::empty_cuda(12, at::kFloat, at::kCUDA, std::nullopt);
+  // for test empty_cuda:
+  at::Tensor bb =
+      at::detail::empty_cuda(12, at::kFloat, at::kCUDA, std::nullopt);
 
+  // for test sizoof(at::Half):
+  std::cout << sizeof(at::Half) << std::endl;
+  at::Tensor num_non_exiting_ctas = at::empty(
+      {}, at::TensorOptions().device(a.device()).dtype(at::ScalarType::Int));
+
+  {
+    std::vector<int64_t> shape = {2, 3, 4, 5};
+    size_t size =
+        c10::elementSize(at::ScalarType::Float) * c10::multiply_integers(shape);
+    std::cout << "multiply_integers out: " << size << std::endl;
+  }
+  {
+    std::vector<int> shape = {2, 3, 4, 5};
+    size_t size =
+        c10::elementSize(at::ScalarType::Float) * c10::sum_integers(shape);
+    std::cout << "sum_integers out: " << size << std::endl;
+  }
 }

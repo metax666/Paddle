@@ -27,3 +27,7 @@ enum class PADDLE_API MemoryFormat : int8_t {
 };
 
 }
+
+namespace torch {
+using c10::MemoryFormat;
+}  // namespace torch

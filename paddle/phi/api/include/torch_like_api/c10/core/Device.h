@@ -35,3 +35,7 @@ struct Device final {
 };
 
 }  // namespace c10
+
+namespace torch {
+using c10::Device;
+}  // namespace torch

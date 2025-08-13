@@ -13,9 +13,10 @@
 // limitations under the License.
 
 #pragma once
+#include <c10/core/SymInt.h>
+
 #include <cstdint>
 #include <optional>
-#include <c10/symint.h>
 
 namespace at::indexing {
 

@@ -14,16 +14,16 @@
 
 #pragma once
 
-#include "paddle/phi/api/include/api.h"
-#include "paddle/phi/api/include/tensor.h"
 #include <ATen/common.h>
-#include <c10/core/Device.h>
 #include <ATen/core/TensorBase.h>
+#include <c10/core/Device.h>
 #include <c10/core/MemoryFormat.h>
 #include <c10/core/ScalarType.h>
-#include <c10/tensor_options.h>
+#include <c10/core/TensorOptions.h>
 #include <compat/int_array_ref_conversion.h>
 #include <compat/scalar_type_conversion.h>
+#include "paddle/phi/api/include/api.h"
+#include "paddle/phi/api/include/tensor.h"
 #include "paddle/phi/common/place.h"
 
 namespace at {
@@ -73,17 +73,17 @@ class PADDLE_API Tensor : public TensorBase {
 
   at::Tensor contiguous(
       c10::MemoryFormat memory_format = c10::MemoryFormat::Contiguous) const {
-    if (memory_format != c10::MemoryFormat::Contiguous) {
-      UNSUPPORTED_FEATURE_IN_PADDLE("`MemoryFormat` other than Contiguous")
-    }
+    PD_CHECK(memory_format == c10::MemoryFormat::Contiguous,
+             "`MemoryFormat` other than Contiguous");
+
     return tensor_.contiguous();
   }
 
   bool is_contiguous(
       at::MemoryFormat memory_format = at::MemoryFormat::Contiguous) const {
-    if (memory_format != c10::MemoryFormat::Contiguous) {
-      UNSUPPORTED_FEATURE_IN_PADDLE("`MemoryFormat` other than Contiguous")
-    }
+    PD_CHECK(memory_format == c10::MemoryFormat::Contiguous,
+             "`MemoryFormat` other than Contiguous");
+
     return tensor_.is_contiguous();
   }
 
